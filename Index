@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BGS 鑑定試算" />
+  <meta name="theme-color" content="#0b0f17" />
+  <title>BGS 評分與總分模擬試算器（含 PSA 對照）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slateDark: '#0b0f17',
+            cardDark: '#131926',
+            borderDark: '#232d42',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #0b0f17;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 標籤金屬光澤質感 */
+    .label-black {
+      background: linear-gradient(135deg, #1c1c1e 0%, #09090b 55%, #27272a 100%);
+      border: 2px solid #eab308;
+      box-shadow: 0 10px 30px -5px rgba(234, 179, 8, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      color: #facc15;
+    }
+    .label-gold {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 45%, #fbbf24 75%, #b45309 100%);
+      border: 2px solid #fef08a;
+      box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      color: #18181b;
+    }
+    .label-silver {
+      background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #cbd5e1 80%, #64748b 100%);
+      border: 2px solid #f8fafc;
+      box-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      color: #0f172a;
+    }
+
+    /* PSA 經典紅框白底標籤 */
+    .label-psa {
+      background: #ffffff;
+      border: 3px solid #dc2626;
+      box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.25), inset 0 0 0 1.5px #fca5a5;
+      color: #0f172a;
+    }
+    .psa-header-stripe {
+      background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+    }
+
+    .slab-case {
+      background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255,255,255,0.18);
+    }
+
+    .score-pill {
+      transition: all 0.14s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .score-pill:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- 緊貼手機頂端安全區的標題列 -->
+  <header class="border-b border-borderDark bg-[#0d131f]/95 backdrop-blur-md sticky top-0 z-30" style="padding-top: env(safe-area-inset-top);">
+    <div class="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-black text-base sm:text-lg shadow-lg shadow-amber-500/20 shrink-0">
+          B
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <h1 class="text-base sm:text-xl font-bold tracking-tight text-white truncate">
+              BGS 評分與總分模擬試算器
+            </h1>
+            <span class="px-1.5 py-0.5 text-[10px] sm:text-xs font-bold rounded bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
+              + PSA 對照
+            </span>
+          </div>
+          <p class="text-[11px] sm:text-xs text-slate-400 truncate mt-0.5">
+            支援四項細分演算、木桶效應判定、卡盒標籤預覽與 PSA 跨評對照
+          </p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-2 text-xs text-slate-400 bg-cardDark px-3 py-1.5 rounded-full border border-borderDark shrink-0">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>BGS / PSA 雙系統即時演算</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-3.5 sm:px-6 pt-3 sm:pt-6 pb-10 space-y-5 sm:space-y-7">
+    
+    <!-- 主互動區：左側設定，右側結果 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+      
+      <!-- 左側：四項細分設定與預設組合 (7 cols) -->
+      <section class="lg:col-span-7 bg-cardDark border border-borderDark rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
+        <div class="flex items-center justify-between gap-2 border-b border-borderDark pb-3">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              四項細分分數設定 (Subgrades)
+            </h2>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">點選按鈕或使用下拉選單調整各項卡況分數</p>
+          </div>
+          <button onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer shrink-0">
+            重設全 9.5
+          </button>
+        </div>
+
+        <!-- 快捷組合按鈕 -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-300">常見組合一鍵代入</span>
+            <span class="text-[11px] text-slate-500">點擊快速測試邊界條件</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2">
+            <button onclick="applyPreset(10, 10, 10, 10)" class="text-xs px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-amber-500/40 font-medium transition cursor-pointer">
+              黑標 10 (全 10)
+            </button>
+            <button onclick="applyPreset(10, 10, 10, 9.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium transition cursor-pointer">
+              金標 10 (三10一9.5)
+            </button>
+            <button onclick="applyPreset(10, 9.5, 9.5, 9.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 border border-amber-500/20 transition cursor-pointer">
+              強 9.5 Quad+
+            </button>
+            <button onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 border border-amber-500/20 transition cursor-pointer">
+              標準 9.5 True Gem
+            </button>
+            <button onclick="applyPreset(9, 9.5, 9.5, 9.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 border border-amber-500/20 transition cursor-pointer">
+              弱 9.5 (置中 9)
+            </button>
+            <button onclick="applyPreset(9.5, 9.5, 9.5, 9)" class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 border border-amber-500/20 transition cursor-pointer">
+              弱 9.5 (表面 9)
+            </button>
+            <button onclick="applyPreset(10, 10, 9, 9)" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-600/50 transition cursor-pointer">
+              雙 9 降級 (10/10/9/9)
+            </button>
+            <button onclick="applyPreset(10, 10, 10, 8.5)" class="text-xs px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition cursor-pointer">
+              低分壓制 (10/10/10/8.5)
+            </button>
+          </div>
+        </div>
+
+        <!-- 四項細分控制器容器 -->
+        <div id="subgradesContainer" class="space-y-3 pt-1">
+          <!-- 由 JS 動態渲染四項控制列 -->
+        </div>
+      </section>
+
+      <!-- 右側：BGS + PSA 卡盒標籤與計算分析 (5 cols) -->
+      <section class="lg:col-span-5 space-y-4 sm:space-y-5">
+        
+        <!-- 雙鑑定卡盒標籤預覽區 -->
+        <div class="slab-case rounded-2xl p-4 sm:p-5 space-y-3.5">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span class="font-semibold tracking-wider uppercase">BGS × PSA 雙標籤即時預覽</span>
+            <span id="tierBadge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              TRUE GEM
+            </span>
+          </div>
+
+          <!-- 1. BGS 模擬卡盒標籤 -->
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 mb-1 flex items-center justify-between">
+              <span>BGS 鑑定標籤</span>
+              <span class="font-mono text-[10px] text-slate-500">BECKETT GRADING</span>
+            </div>
+            <div id="slabLabel" class="label-gold rounded-xl p-3.5 transition-all duration-300">
+              <div class="flex items-stretch justify-between gap-2.5">
+                <!-- 左側卡片資訊與四項細分 -->
+                <div class="flex-1 flex flex-col justify-between min-w-0">
+                  <div>
+                    <div class="text-[9px] font-mono uppercase tracking-widest opacity-80 font-bold">
+                      Beckett Grading Services
+                    </div>
+                    <div class="text-xs sm:text-sm font-black tracking-tight truncate mt-0.5">
+                      TCG / SPORTS COLLECTIBLE
+                    </div>
+                  </div>
+                  
+                  <!-- 四項細分網格 -->
+                  <div class="grid grid-cols-2 gap-x-2.5 gap-y-1 mt-2 pt-2 border-t border-current/20 font-mono text-[11px] sm:text-xs font-bold">
+                    <div class="flex justify-between">
+                      <span class="opacity-80">CENTERING</span>
+                      <span id="labelC">9.5</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="opacity-80">EDGES</span>
+                      <span id="labelE">9.5</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="opacity-80">CORNERS</span>
+                      <span id="labelCo">9.5</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="opacity-80">SURFACE</span>
+                      <span id="labelS">9.5</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 右側總分方塊 -->
+                <div class="w-20 sm:w-22 rounded-lg border-2 border-current/30 bg-black/10 flex flex-col items-center justify-center p-1.5 text-center shrink-0">
+                  <span id="labelGradeText" class="text-[9px] font-black tracking-wider uppercase leading-tight">
+                    GEM MINT
+                  </span>
+                  <span id="labelFinalScore" class="text-2xl sm:text-3xl font-mono font-black tracking-tighter leading-none my-1">
+                    9.5
+                  </span>
+                  <span id="labelColorTag" class="text-[8px] font-bold uppercase tracking-widest opacity-85">
+                    GOLD LABEL
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. PSA 對應卡盒標籤 -->
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 mb-1 flex items-center justify-between">
+              <span>PSA 跨評 / 同級參考標籤</span>
+              <span id="psaProbBadge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                PSA 10 機率：極高
+              </span>
+            </div>
+            <div class="label-psa rounded-xl overflow-hidden transition-all duration-300">
+              <div class="psa-header-stripe px-3 py-1 flex items-center justify-between text-white text-[9px] font-mono font-bold tracking-widest">
+                <span>PROFESSIONAL SPORTS AUTHENTICATOR</span>
+                <span>PSA</span>
+              </div>
+              <div class="p-3 flex items-center justify-between gap-2.5 bg-white text-slate-900">
+                <div class="flex-1 min-w-0">
+                  <div class="text-[10px] font-mono font-bold text-slate-500">
+                    EQUIVALENT / CROSSOVER ESTIMATE
+                  </div>
+                  <div id="psaLabelGradeName" class="text-sm sm:text-base font-black tracking-tight text-slate-900 mt-0.5">
+                    GEM MT 10
+                  </div>
+                  <div id="psaSubNote" class="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                    四項細分均衡達標，符合 PSA 10 品相要求。
+                  </div>
+                </div>
+                <div class="w-16 sm:w-18 h-14 sm:h-16 rounded-lg border-2 border-red-600 bg-red-50/40 flex flex-col items-center justify-center shrink-0">
+                  <span class="text-[9px] font-black text-red-600 tracking-widest">PSA</span>
+                  <span id="psaLabelScore" class="text-2xl sm:text-3xl font-mono font-black text-slate-900 leading-none mt-0.5">
+                    10
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 數據對比指標 -->
+          <div class="grid grid-cols-3 gap-2 pt-0.5">
+            <div class="bg-slateDark/80 border border-borderDark rounded-xl p-2.5 text-center">
+              <div class="text-[10px] text-slate-400">四項算術平均</div>
+              <div id="statAvg" class="text-base sm:text-lg font-mono font-bold text-slate-200 mt-0.5">9.50</div>
+            </div>
+            <div class="bg-slateDark/80 border border-borderDark rounded-xl p-2.5 text-center">
+              <div class="text-[10px] text-slate-400">最低單項分</div>
+              <div id="statMin" class="text-base sm:text-lg font-mono font-bold text-amber-400 mt-0.5">9.5</div>
+            </div>
+            <div class="bg-slateDark/80 border border-borderDark rounded-xl p-2.5 text-center">
+              <div class="text-[10px] text-slate-400">BGS / PSA 預估</div>
+              <div class="text-base sm:text-lg font-mono font-bold mt-0.5">
+                <span id="statFinal" class="text-emerald-400">9.5</span>
+                <span class="text-slate-600 text-xs mx-0.5">/</span>
+                <span id="statPsa" class="text-red-400">10</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 判定邏輯與跨評解析卡片 -->
+        <div class="bg-cardDark border border-borderDark rounded-2xl p-4 sm:p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+            <h3 id="resultTitle" class="text-sm sm:text-base font-bold text-white">金標 9.5 — True Gem（標準全 9.5）</h3>
+          </div>
+          <p id="resultDesc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            四項細分皆達到 9.5 分且無任何短版，是現代高階卡送評最穩健的標準 Gem Mint 品相。
+          </p>
+          
+          <!-- 規則觸發清單 -->
+          <div id="ruleBreakdown" class="pt-2 border-t border-borderDark space-y-1.5 text-xs">
+            <!-- JS 動態填入判定細節 -->
+          </div>
+
+          <!-- PSA 跨評深度分析區塊 -->
+          <div class="pt-2.5 border-t border-borderDark">
+            <div class="text-xs font-bold text-red-400 flex items-center gap-1.5 mb-1">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <span>PSA 跨評 / 送評策略建議</span>
+            </div>
+            <p id="psaCrossoverDetail" class="text-xs text-slate-300 leading-relaxed bg-slateDark/70 p-2.5 rounded-lg border border-borderDark">
+              <!-- JS 動態填入 PSA 跨評細節 -->
+            </p>
+          </div>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- 底部：BGS 與 PSA 評分標準對照表 -->
+    <section class="bg-cardDark border border-borderDark rounded-2xl p-4 sm:p-6 shadow-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-white">BGS 與 PSA 評分與置中度標準對照表</h2>
+          <p class="text-xs text-slate-400 mt-0.5">比較兩大鑑定機構在置中度容許範圍、標籤等級與高分段門檻的核心差異</p>
+        </div>
+        <span class="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg self-start">
+          核心規則：BGS 總分受最低單項限制；PSA 對置中度較寬鬆但嚴抓表面壓痕
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead>
+            <tr class="border-b border-borderDark text-slate-400 text-[11px] sm:text-xs uppercase bg-slateDark/60">
+              <th class="py-2.5 px-3 font-semibold">BGS 等級 / 標籤</th>
+              <th class="py-2.5 px-3 font-semibold">BGS 典型細分組合</th>
+              <th class="py-2.5 px-3 font-semibold">BGS 正面置中要求</th>
+              <th class="py-2.5 px-3 font-semibold text-red-400">PSA 對應等級</th>
+              <th class="py-2.5 px-3 font-semibold text-red-300">PSA 正面置中要求</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-borderDark/70 text-slate-300">
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-2.5 px-3 font-bold text-amber-400 whitespace-nowrap">BGS 10 黑標</td>
+              <td class="py-2.5 px-3 font-mono font-semibold text-white whitespace-nowrap">10 / 10 / 10 / 10</td>
+              <td class="py-2.5 px-3">四邊皆須 <span class="text-amber-300 font-semibold">50/50</span></td>
+              <td class="py-2.5 px-3 font-bold text-red-400 whitespace-nowrap">PSA 10 (遠超標準)</td>
+              <td class="py-2.5 px-3">55/45 至 60/40 內皆可</td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-2.5 px-3 font-bold text-amber-300 whitespace-nowrap">BGS 10 金標</td>
+              <td class="py-2.5 px-3 font-mono font-semibold text-white whitespace-nowrap">10 / 10 / 10 / 9.5</td>
+              <td class="py-2.5 px-3">幾乎全 50/50（單項可 55/45）</td>
+              <td class="py-2.5 px-3 font-bold text-red-400 whitespace-nowrap">PSA 10 (極高機率)</td>
+              <td class="py-2.5 px-3">55/45 至 60/40 內皆可</td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-2.5 px-3 font-bold text-amber-200 whitespace-nowrap">BGS 9.5 強/標準</td>
+              <td class="py-2.5 px-3 font-mono font-semibold text-white whitespace-nowrap">9.5 全滿 或 含 10</td>
+              <td class="py-2.5 px-3">一軸 50/50，另一軸 <span class="text-white font-semibold">55/45</span></td>
+              <td class="py-2.5 px-3 font-bold text-red-400 whitespace-nowrap">PSA 10 (高機率跨評)</td>
+              <td class="py-2.5 px-3">55/45 至 60/40 內皆可</td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-2.5 px-3 font-bold text-amber-200 whitespace-nowrap">BGS 9.5 弱 (Min Gem)</td>
+              <td class="py-2.5 px-3 font-mono font-semibold text-white whitespace-nowrap">9.5 / 9.5 / 9.5 / 9</td>
+              <td class="py-2.5 px-3">若置中為 9，雙軸約 <span class="text-white font-semibold">55/45</span></td>
+              <td class="py-2.5 px-3 font-bold text-amber-300 whitespace-nowrap">PSA 9 ～ 10 (視9分項而定)</td>
+              <td class="py-2.5 px-3">僅置中 55/45 仍有機會 PSA 10</td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-2.5 px-3 font-bold text-slate-300 whitespace-nowrap">BGS 9 銀標</td>
+              <td class="py-2.5 px-3 font-mono text-slate-300 whitespace-nowrap">雙 9 或單項 8.5 壓制</td>
+              <td class="py-2.5 px-3">雙軸 <span class="text-white font-semibold">55/45</span> 或更好</td>
+              <td class="py-2.5 px-3 font-bold text-slate-200 whitespace-nowrap">PSA 9 (MINT)</td>
+              <td class="py-2.5 px-3">正面 60/40 至 65/35 內</td>
+            </tr>
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-2.5 px-3 font-bold text-slate-400 whitespace-nowrap">BGS 8 ～ 8.5 銀標</td>
+              <td class="py-2.5 px-3 font-mono text-slate-400 whitespace-nowrap">含 8 或 7.5 細項</td>
+              <td class="py-2.5 px-3">雙軸 60/40 或更好</td>
+              <td class="py-2.5 px-3 font-bold text-slate-300 whitespace-nowrap">PSA 8 (NM-MT)</td>
+              <td class="py-2.5 px-3">正面 65/35 至 70/30 內</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const DIMENSIONS = [
+      { id: 'centering', name: '置中度', en: 'Centering', desc: '正反面邊框對稱比例（PSA 對 55/45 較寬鬆）' },
+      { id: 'corners',   name: '邊角',   en: 'Corners',   desc: '四個角的銳利度、有無撞傷或白點（BGS/PSA 皆嚴抓）' },
+      { id: 'edges',     name: '邊緣',   en: 'Edges',     desc: '裁切邊平整度、毛邊或白邊狀況' },
+      { id: 'surface',   name: '表面',   en: 'Surface',   desc: '印刷線、細微刮痕、壓痕或閃膜瑕疵' }
+    ];
+
+    const QUICK_SCORES = [10, 9.5, 9, 8.5, 8];
+    const ALL_SCORES = [10, 9.5, 9, 8.5, 8, 7.5, 7];
+
+    const state = {
+      centering: 9.5,
+      corners: 9.5,
+      edges: 9.5,
+      surface: 9.5
+    };
+
+    function initControls() {
+      const container = document.getElementById('subgradesContainer');
+      container.innerHTML = DIMENSIONS.map(dim => `
+        <div class="bg-slateDark/90 border border-borderDark rounded-xl p-3 sm:p-3.5 transition hover:border-slate-700">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-white text-sm">${dim.name}</span>
+                <span class="text-[11px] font-mono text-slate-400">${dim.en}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">${dim.desc}</p>
+            </div>
+            
+            <!-- 快捷按鈕與完整下拉選單 -->
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              ${QUICK_SCORES.map(val => `
+                <button
+                  type="button"
+                  data-dim="${dim.id}"
+                  data-val="${val}"
+                  onclick="setScore('${dim.id}', ${val})"
+                  class="score-pill px-2 sm:px-2.5 py-1 rounded-md font-mono text-xs font-bold border cursor-pointer ${
+                    state[dim.id] === val
+                      ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm shadow-amber-500/30'
+                      : 'bg-cardDark text-slate-300 border-borderDark hover:border-slate-500'
+                  }"
+                >${val}</button>
+              `).join('')}
+
+              <select
+                id="select-${dim.id}"
+                onchange="setScore('${dim.id}', parseFloat(this.value))"
+                aria-label="${dim.name}完整分數"
+                class="ml-0.5 bg-cardDark text-slate-200 border border-borderDark rounded-md px-1.5 py-1 text-xs font-mono font-bold focus:outline-none focus:border-amber-400 cursor-pointer"
+              >
+                ${ALL_SCORES.map(val => `
+                  <option value="${val}" ${state[dim.id] === val ? 'selected' : ''}>${val}</option>
+                `).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setScore(dim, value) {
+      state[dim] = value;
+      updateButtonStates();
+      calculateAndRender();
+    }
+
+    function applyPreset(c, co, e, s) {
+      state.centering = c;
+      state.corners = co;
+      state.edges = e;
+      state.surface = s;
+      updateButtonStates();
+      calculateAndRender();
+    }
+
+    function updateButtonStates() {
+      DIMENSIONS.forEach(dim => {
+        const currentVal = state[dim.id];
+        const selectEl = document.getElementById(`select-${dim.id}`);
+        if (selectEl) selectEl.value = currentVal;
+
+        const btns = document.querySelectorAll(`button[data-dim="${dim.id}"]`);
+        btns.forEach(btn => {
+          const btnVal = parseFloat(btn.getAttribute('data-val'));
+          if (btnVal === currentVal) {
+            btn.className = 'score-pill px-2 sm:px-2.5 py-1 rounded-md font-mono text-xs font-bold border cursor-pointer bg-amber-500 text-slate-950 border-amber-400 shadow-sm shadow-amber-500/30';
+          } else {
+            btn.className = 'score-pill px-2 sm:px-2.5 py-1 rounded-md font-mono text-xs font-bold border cursor-pointer bg-cardDark text-slate-300 border-borderDark hover:border-slate-500';
+          }
+        });
+      });
+    }
+
+    function estimatePSA(c, co, e, s, bgsFinal) {
+      const scores = [c, co, e, s];
+      const minScore = Math.min(...scores);
+      const count9 = scores.filter(x => x === 9).length;
+
+      if (bgsFinal === 10) {
+        return {
+          psaScore: '10',
+          psaGradeName: 'GEM MT 10',
+          probText: 'PSA 10 機率：極高 (95%+)',
+          probClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+          subNote: '品相已達 Pristine 等級，遠超 PSA 10 門檻。',
+          detail: '此卡在 BGS 已屬 10 分頂級水準，幾乎無肉眼可見瑕疵，若送評 PSA 或跨評（Crossover）拿 PSA 10 的成功率極高。'
+        };
+      }
+
+      if (bgsFinal === 9.5) {
+        if (minScore >= 9.5) {
+          const has10 = scores.includes(10);
+          return {
+            psaScore: '10',
+            psaGradeName: 'GEM MT 10',
+            probText: has10 ? 'PSA 10 機率：很高 (85%+)' : 'PSA 10 機率：高 (75%~85%)',
+            probClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+            subNote: has10 ? 'Quad+ 強 9.5 組合，跨評 PSA 10 優勢顯著。' : 'True Gem 全 9.5 無短版，符合 PSA 10 條件。',
+            detail: has10
+              ? 'Quad+（含 10 分項）在市場上常被視為具備「保底 PSA 10」實力的品相，只要無隱藏表面壓痕，送 PSA 幾乎穩拿 10 分。'
+              : '四項細分皆為 9.5 代表沒有任何單項短版，符合 PSA 10 對於四個維度的綜合要求，具備很高的跨評成功率。'
+          };
+        } else {
+          if (c === 9) {
+            return {
+              psaScore: '10',
+              psaGradeName: 'GEM MT 10 (置中寬容)',
+              probText: 'PSA 10 機率：中高 (70%~80%)',
+              probClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+              subNote: 'PSA 對正面置中（55/45~60/40）較寬鬆，仍具高機率拿 10。',
+              detail: '這是最有利於 PSA 的「弱 9.5」組合！BGS 對置中要求極嚴（55/45 只能拿 9），但 PSA 10 允許正面 55/45 甚至 60/40 以內，因此邊角、邊緣與表面皆達 9.5 的卡在 PSA 非常有機會拿 10。'
+            };
+          } else if (co === 9 || s === 9) {
+            const weakPart = co === 9 ? '邊角（Corners）' : '表面（Surface）';
+            return {
+              psaScore: '9 ～ 10',
+              psaGradeName: 'MINT 9 / GEM MT 10',
+              probText: 'PSA 10 機率：中等 (45%~60%)',
+              probClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+              subNote: `短版落在${weakPart}，PSA 審核對此維度較敏感。`,
+              detail: `雖然 BGS 給予金標 9.5，但 PSA 對「${weakPart}」相當嚴格：若是明顯白點或細微表面壓痕，PSA 往往會直接給 9 分；若是極輕微工廠裁切痕跡則仍有機會拿 10。`
+            };
+          } else {
+            return {
+              psaScore: '10 / 9',
+              psaGradeName: 'GEM MT 10 (邊緣微瑕)',
+              probText: 'PSA 10 機率：中高 (65%~75%)',
+              probClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+              subNote: '邊緣 9 分若無明顯白邊，PSA 仍有機會給予 10。',
+              detail: '邊緣（Edges）在 BGS 拿到 9 分通常是輕微裁切毛邊，若無明顯缺色白邊且其他三項皆 9.5 以上，送評 PSA 仍有不錯的 10 分機會。'
+            };
+          }
+        }
+      }
+
+      if (bgsFinal === 9) {
+        if (count9 >= 2 && minScore === 9) {
+          return {
+            psaScore: '9',
+            psaGradeName: 'MINT 9',
+            probText: 'PSA 10 機率：低 (15%~25%)',
+            probClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+            subNote: '存在兩項以上 9 分瑕疵，PSA 高機率同樣判定為 9。',
+            detail: '由於卡片同時存在兩項以上的 9 分瑕疵，除非兩項 9 分都僅是輕微置中偏移，否則在 PSA 同樣會被歸類在 MINT 9。'
+          };
+        } else {
+          return {
+            psaScore: '8 ～ 9',
+            psaGradeName: 'MINT 9 / NM-MT 8',
+            probText: 'PSA 10 機率：極低 (<5%)',
+            probClass: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+            subNote: '單項 8.5 瑕疵在 PSA 無法拿 10，若為壓痕可能降至 PSA 6~8。',
+            detail: '受限於單項 8.5 的明顯瑕疵，此卡無緣 PSA 10。需特別注意：若該 8.5 分是因「表面微小壓痕（Dent/Indent）」造成，PSA 對壓痕扣分極重，可能直接掉至 PSA 6～8 分。'
+          };
+        }
+      }
+
+      const estNum = Math.round(bgsFinal);
+      return {
+        psaScore: `${estNum}`,
+        psaGradeName: estNum === 8 ? 'NM-MT 8' : 'NM 7',
+        probText: 'PSA 10 機率：無',
+        probClass: 'bg-slate-700/60 text-slate-300 border-slate-600',
+        subNote: `整體卡況對應 PSA ${estNum} 等級區間。`,
+        detail: `卡片具備多處可見磨損或單項明顯損傷（最低單項 ${minScore} 分），送評 PSA 預期落在 PSA ${estNum} 左右（若有結構性折痕或壓痕則可能更低）。`
+      };
+    }
+
+    function calculateAndRender() {
+      const { centering: c, corners: co, edges: e, surface: s } = state;
+      const rawScores = [c, co, e, s];
+      const sorted = [...rawScores].sort((a, b) => a - b);
+      
+      const min1 = sorted[0];
+      const min2 = sorted[1];
+      const max = sorted[3];
+      const avg = (c + co + e + s) / 4;
+
+      const count10 = rawScores.filter(x => x === 10).length;
+      const count9 = rawScores.filter(x => x === 9).length;
+
+      let finalScore = 0;
+      let labelStyle = 'label-gold';
+      let gradeText = 'GEM MINT';
+      let colorTag = 'GOLD LABEL';
+      let tierBadge = 'TRUE GEM';
+      let title = '';
+      let desc = '';
+      let dotColor = 'bg-amber-400';
+      let rules = [];
+
+      if (count10 === 4) {
+        finalScore = 10;
+        labelStyle = 'label-black';
+        gradeText = 'PRISTINE';
+        colorTag = 'BLACK LABEL';
+        tierBadge = 'BLACK LABEL 10';
+        dotColor = 'bg-yellow-400';
+        title = '黑標 10 — Pristine（四項全 10）';
+        desc = '鑑定界最高殿堂！四項細分全數獲得滿分 10，市場稀有度與溢價遠超金標 10 與 PSA 10。';
+        rules = [
+          { ok: true, text: '達成「四項全 10」最高門檻，自動授予黑標（Black Label）。' },
+          { ok: true, text: '正面置中須達四邊 50/50，邊角、邊緣與表面皆無任何顯微瑕疵。' }
+        ];
+      } else if (count10 === 3 && min1 === 9.5) {
+        finalScore = 10;
+        labelStyle = 'label-gold';
+        gradeText = 'PRISTINE';
+        colorTag = 'GOLD LABEL';
+        tierBadge = 'PRISTINE 10';
+        dotColor = 'bg-amber-400';
+        title = '金標 10 — Pristine（三項 10 + 一項 9.5）';
+        desc = '極致完美品相，僅單一維度有極微小的 0.5 差距，總分進位至 Pristine 10 金標。';
+        rules = [
+          { ok: true, text: '符合「三項 10 + 一項 9.5」規則，總分判定為 10（金標）。' },
+          { ok: true, text: '若該 9.5 項能提升至 10，即可晉升為黑標 10。' }
+        ];
+      } else if (min1 >= 9.5) {
+        finalScore = 9.5;
+        labelStyle = 'label-gold';
+        gradeText = 'GEM MINT';
+        colorTag = 'GOLD LABEL';
+        dotColor = 'bg-amber-400';
+
+        if (count10 >= 1) {
+          tierBadge = 'QUAD+ 9.5';
+          title = `金標 9.5 — Quad+ 強 9.5（含 ${count10} 項 10）`;
+          desc = '未達「三項 10」的金標 10 門檻，歸入高分 9.5。在玩家市場中具備極高的跨評 PSA 10 潛力。';
+          rules = [
+            { ok: true, text: `所有細項皆 ≥ 9.5，且包含 ${count10} 項滿分 10 拉抬整體品相。` },
+            { ok: false, text: `距離金標 10 仍差 ${3 - count10} 個 10 分細項。` }
+          ];
+        } else {
+          tierBadge = 'TRUE GEM 9.5';
+          title = '金標 9.5 — True Gem（標準全 9.5）';
+          desc = '四項細分均衡達到 9.5 且無任何短版，是現代高階卡送評最穩健的標準 Gem Mint 品相。';
+          rules = [
+            { ok: true, text: '四項細分皆為 9.5（Quad 9.5），無低分短版。' },
+            { ok: true, text: '市場流動性與保值度最穩定的 9.5 基準組合。' }
+          ];
+        }
+      } else if (min1 === 9 && count9 === 1) {
+        finalScore = 9.5;
+        labelStyle = 'label-gold';
+        gradeText = 'GEM MINT';
+        colorTag = 'GOLD LABEL';
+        tierBadge = 'MIN GEM 9.5';
+        dotColor = 'bg-amber-300';
+        title = '金標 9.5 — Min Gem 弱 9.5（三 9.5 以上 + 一項 9）';
+        desc = '剛好踩在金標 9.5 的最低門檻！受惠於其餘三項皆達 9.5 或 10，成功拉抬單一 9 分項保住 9.5 金標。';
+        rules = [
+          { ok: true, text: '符合「最低單項不低於 9」且「全卡僅有一項 9」的寬容拉抬條件。' },
+          { ok: false, text: '警告：若再有任何一項掉到 9，總分將直接降為 9（銀標）。' }
+        ];
+      } else if (min1 === 9 && count9 >= 2) {
+        finalScore = 9;
+        labelStyle = 'label-silver';
+        gradeText = 'MINT';
+        colorTag = 'SILVER LABEL';
+        tierBadge = 'MINT 9 (雙9降級)';
+        dotColor = 'bg-slate-400';
+        title = '銀標 9 — Mint（觸發多項 9 降級規則）';
+        desc = `雖然四項算術平均為 ${avg.toFixed(2)} 分，但因同時出現 ${count9} 項 9 分，依據 BGS 規則總分無法給到 9.5。`;
+        rules = [
+          { ok: false, text: `出現 ${count9} 項 9 分（超過「最多一項 9」上限），觸發降級規則。` },
+          { ok: true, text: '需將其中一項 9 分提升至 9.5 以上，方可拿回金標 9.5。' }
+        ];
+      } else {
+        labelStyle = 'label-silver';
+        colorTag = 'SILVER LABEL';
+        dotColor = 'bg-rose-400';
+
+        let cappedMax = min1 + 0.5;
+        if (min1 === 8.5) {
+          finalScore = 9;
+          gradeText = 'MINT';
+          tierBadge = 'MINT 9 (低分壓制)';
+          title = '銀標 9 — Mint（觸發單項 8.5 低分壓制）';
+          desc = `即使其他三項分數極高（算術平均 ${avg.toFixed(2)}），但因出現單項 8.5 分，受木桶效應限制，總分最高僅能給到 9。`;
+          rules = [
+            { ok: false, text: '最低單項為 8.5，觸發「總分不超過最低項 +0.5」的硬性壓制。' },
+            { ok: false, text: '只要有任何一項低於 9，即完全喪失金標 9.5 資格。' }
+          ];
+        } else {
+          finalScore = avg >= cappedMax ? cappedMax : Math.round(avg * 2) / 2;
+          if (finalScore < min1) finalScore = min1;
+
+          if (finalScore === 8.5) {
+            gradeText = 'NM-MT+';
+          } else if (finalScore === 8) {
+            gradeText = 'NM-MT';
+          } else if (finalScore === 7.5) {
+            gradeText = 'NM+';
+          } else {
+            gradeText = 'NM';
+          }
+
+          tierBadge = `SILVER ${finalScore}`;
+          title = `銀標 ${finalScore} — ${gradeText}（低分壓制生效）`;
+          desc = `最低單項分數為 ${min1} 分，總分受到木桶效應嚴格限制（最高不超過 ${cappedMax} 分），卡況具備明顯肉眼可見瑕疵。`;
+          rules = [
+            { ok: false, text: `最低單項為 ${min1} 分，總分上限被鎖定在 ${cappedMax} 分。` },
+            { ok: true, text: `四項算術平均為 ${avg.toFixed(2)} 分，綜合判定總分為 ${finalScore}。` }
+          ];
+        }
+      }
+
+      const psaResult = estimatePSA(c, co, e, s, finalScore);
+
+      document.getElementById('labelC').textContent = c;
+      document.getElementById('labelCo').textContent = co;
+      document.getElementById('labelE').textContent = e;
+      document.getElementById('labelS').textContent = s;
+
+      const slabEl = document.getElementById('slabLabel');
+      slabEl.className = `${labelStyle} rounded-xl p-3.5 transition-all duration-300`;
+
+      document.getElementById('labelGradeText').textContent = gradeText;
+      document.getElementById('labelFinalScore').textContent = finalScore;
+      document.getElementById('labelColorTag').textContent = colorTag;
+      document.getElementById('tierBadge').textContent = tierBadge;
+
+      document.getElementById('psaLabelScore').textContent = psaResult.psaScore;
+      document.getElementById('psaLabelGradeName').textContent = psaResult.psaGradeName;
+      document.getElementById('psaSubNote').textContent = psaResult.subNote;
+      const psaBadgeEl = document.getElementById('psaProbBadge');
+      psaBadgeEl.textContent = psaResult.probText;
+      psaBadgeEl.className = `px-1.5 py-0.5 rounded text-[10px] font-bold border ${psaResult.probClass}`;
+
+      document.getElementById('statAvg').textContent = avg.toFixed(2);
+      document.getElementById('statMin').textContent = min1;
+      document.getElementById('statFinal').textContent = finalScore;
+      document.getElementById('statFinal').className = `font-mono font-bold ${
+        finalScore >= 9.5 ? 'text-amber-400' : 'text-slate-200'
+      }`;
+      document.getElementById('statPsa').textContent = psaResult.psaScore;
+
+      document.getElementById('statusDot').className = `w-2.5 h-2.5 rounded-full ${dotColor} shrink-0`;
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultDesc').textContent = desc;
+      document.getElementById('psaCrossoverDetail').textContent = psaResult.detail;
+
+      const breakdownEl = document.getElementById('ruleBreakdown');
+      breakdownEl.innerHTML = rules.map(r => `
+        <div class="flex items-start gap-2 ${r.ok ? 'text-emerald-300/90' : 'text-rose-300/90'}">
+          <span class="font-bold mt-0.5 shrink-0">${r.ok ? '✓' : '✕'}</span>
+          <span>${r.text}</span>
+        </div>
+      `).join('');
+    }
+
+    initControls();
+    calculateAndRender();
+  </script>
+</body>
+</html>
