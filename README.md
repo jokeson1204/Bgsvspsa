@@ -142,7 +142,7 @@
               </svg>
               四項細分分數設定（Subgrades）
             </h2>
-            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">點選按鈕調整各項卡況分數（支援 7 至 10 分）</p>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">點選按鈕調整各項卡況分數（支援 8 至 10 分）</p>
           </div>
           <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 border border-slate-700 transition">
             重設全 9.5
@@ -486,8 +486,8 @@
   </main>
 
   <script>
-    // 支援的細分分數選項
-    const SCORE_OPTIONS = [10, 9.5, 9, 8.5, 8, 7.5, 7];
+    // 支援的細分分數選項（10 至 8 分）
+    const SCORE_OPTIONS = [10, 9.5, 9, 8.5, 8];
 
     // 四個評分維度定義
     const DIMENSIONS = [
@@ -505,7 +505,7 @@
       S: 9.5
     };
 
-    // 初始化渲染控制面板（專為 iPhone 16 觸控手感優化：7顆按鈕等寬滿版網格，移除下拉選單）
+    // 初始化渲染控制面板（專為 iPhone 16 觸控手感優化：5顆按鈕等寬滿版網格，按壓更寬敞）
     function initControls() {
       const container = document.getElementById('subgradesContainer');
       container.innerHTML = DIMENSIONS.map(dim => {
@@ -538,7 +538,7 @@
               <span class="text-[11px] text-slate-400 truncate">${dim.hint}</span>
             </div>
 
-            <div class="grid grid-cols-7 gap-1.5">
+            <div class="grid grid-cols-5 gap-2">
               ${buttonsHtml}
             </div>
           </div>
