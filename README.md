@@ -104,41 +104,75 @@
         </div>
         <div class="min-w-0">
           <h1 class="text-[15px] sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
-            BGS 評分模擬試算器
+            BGS 評分模擬器
             <span class="hidden md:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
               Beckett Grading Simulator
             </span>
-            <span class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
-              + PSA 對照
-            </span>
-          </h1>
-          <p class="hidden sm:block text-xs text-slate-400 leading-snug mt-0.5">支援四項細分演算、木桶效應判定、卡盒標籤預覽與 PSA 跨評等級對照</p>
-        </div>
-      </div>
-      <div class="shrink-0 flex items-center text-[11px] sm:text-xs text-slate-400">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="hidden sm:inline">BGS / PSA 雙系統即時演算</span>
-          <span class="sm:hidden font-medium">雙系統演算</span>
-        </span>
-      </div>
-    </div>
-  </header>
-
-  <!-- 主要操作與展示區 -->
-  <main class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-3.5 pb-10 sm:py-6 space-y-5 sm:space-y-8">
-
-    <!-- 核心互動區：左輸入 / 右預覽 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
-
       <!-- 左側：分數控制面板 (佔 7 欄) -->
       <section class="lg:col-span-7 bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm space-y-4 sm:space-y-5">
         <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
-          <h1 class="text-[15px] sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
-            BGS 評分模擬器
-            <span class="hidden md:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
-              Beckett Grading Simulator
+            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              四項細分分數設定（Subgrades）
+            </h2>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">點選按鈕調整各項卡況分數（支援 7 至 10 分）</p>
+          </div>
+          <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 border border-slate-700 transition">
+            重設全 9.5
+          </button>
+        </div>
+
+        <!-- 常見組合一鍵代入快捷列（iPhone 16 支援單行橫向滑動，節省垂直空間） -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">常見組合一鍵代入</span>
+            <span class="text-[11px] text-slate-500">左右滑動選擇組合</span>
+          </div>
+          <div class="flex sm:flex-wrap gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+            <button type="button" onclick="applyPreset(10, 10, 10, 10)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-zinc-950 text-amber-400 border border-amber-500/60 hover:bg-amber-500/10 active:scale-95 transition shadow-sm">
+              黑標 10 (10/10/10/10)
+            </button>
+            <button type="button" onclick="applyPreset(10, 10, 10, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/50 hover:bg-amber-500/25 active:scale-95 transition">
+              金標 10 (10/10/10/9.5)
+            </button>
+            <button type="button" onclick="applyPreset(10, 10, 9.5, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 hover:bg-amber-500/20 active:scale-95 transition">
+              強 9.5 Quad+ (10/10/9.5/9.5)
+            </button>
+            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 hover:bg-amber-500/20 active:scale-95 transition">
+              標準 9.5 True Gem (全 9.5)
+            </button>
+            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 hover:bg-amber-500/20 active:scale-95 transition">
+              弱 9.5 Min Gem (9.5/9.5/9.5/9)
+            </button>
+            <button type="button" onclick="applyPreset(10, 10, 9, 9)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 hover:bg-slate-700 active:scale-95 transition">
+              雙 9 降級 (10/10/9/9)
+            </button>
+            <button type="button" onclick="applyPreset(10, 10, 10, 8.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 hover:bg-slate-700 active:scale-95 transition">
+              單項 8.5 壓制 (10/10/10/8.5)
+            </button>
+          </div>
+        </div>
+
+        <!-- 四大細項輸入容器 -->
+        <div id="subgradesContainer" class="space-y-3 sm:space-y-4 pt-1">
+          <!-- 由 JS 動態渲染四個維度的控制列 -->
+        </div>
+      </section>
+
+      <!-- 右側：即時卡盒標籤預覽 & 評分邏輯解析 (佔 5 欄) -->
+      <section class="lg:col-span-5 space-y-5 sm:space-y-6">
+
+        <!-- 模擬 BGS 卡盒頂部標籤 (Slab Label) -->
+        <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
+          <div class="flex items-center justify-between mb-3.5 sm:mb-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              BGS 鑑定卡盒標籤即時預覽
             </span>
             <span id="subTierPill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
               True Gem
