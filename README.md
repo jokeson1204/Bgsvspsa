@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -504,8 +503,6 @@
       S: 9.5
     };
 
-    // 初始化渲染控制面板
-    function initControls() {
     // 初始化渲染控制面板（專為 iPhone 16 觸控手感優化：7顆按鈕等寬滿版網格，移除下拉選單）
     function initControls() {
       const container = document.getElementById('subgradesContainer');
