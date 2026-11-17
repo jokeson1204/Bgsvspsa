@@ -2,7 +2,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>BGS (Beckett Grading Services) 評分與總分模擬試算器</title>
+  <meta name="color-scheme" content="dark" />
+  <title>BGS 評分模擬器 (Beckett Grading Simulator)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -134,67 +135,10 @@
       <section class="lg:col-span-7 bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm space-y-4 sm:space-y-5">
         <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
-            <h2 class="text-[15px] sm:text-lg font-bold text-white flex items-center gap-1.5 sm:gap-2">
-              <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              四項細分分數設定
-            </h2>
-            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">點擊按鈕設定各項分數（7 至 10 分）</p>
-          </div>
-          <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-slate-800 active:scale-95 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
-            重設全 9.5
-          </button>
-        </div>
-
-        <!-- 常見組合一鍵代入快捷列：iPhone 橫向滑動不折行，節省垂直空間 -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">常見組合一鍵代入</span>
-            <span class="text-[11px] text-slate-500">左右滑動快速切換 →</span>
-          </div>
-          <div class="flex sm:flex-wrap gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
-            <button type="button" onclick="applyPreset(10, 10, 10, 10)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-zinc-950 text-amber-400 border border-amber-500/60 active:scale-95 hover:bg-amber-500/10 transition shadow-sm">
-              黑標 10 (全10)
-            </button>
-            <button type="button" onclick="applyPreset(10, 10, 10, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/50 active:scale-95 hover:bg-amber-500/25 transition">
-              金標 10 (三10一9.5)
-            </button>
-            <button type="button" onclick="applyPreset(10, 10, 9.5, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 active:scale-95 hover:bg-amber-500/20 transition">
-              強 9.5 Quad+
-            </button>
-            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 active:scale-95 hover:bg-amber-500/20 transition">
-              標準 True Gem (全9.5)
-            </button>
-            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 active:scale-95 hover:bg-amber-500/20 transition">
-              弱 9.5 Min Gem (三9.5一9)
-            </button>
-            <button type="button" onclick="applyPreset(10, 10, 9, 9)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 active:scale-95 hover:bg-slate-700 transition">
-              雙 9 降級 (10/10/9/9)
-            </button>
-            <button type="button" onclick="applyPreset(10, 10, 10, 8.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 active:scale-95 hover:bg-slate-700 transition">
-              單項 8.5 壓制
-            </button>
-          </div>
-        </div>
-
-        <!-- 四大細項輸入容器 -->
-        <div id="subgradesContainer" class="space-y-3 sm:space-y-4 pt-1">
-          <!-- 由 JS 動態渲染四個維度的控制列 -->
-        </div>
-      </section>
-
-      <!-- 右側：即時卡盒標籤預覽 & 評分邏輯解析 (佔 5 欄) -->
-      <section class="lg:col-span-5 space-y-5 sm:space-y-6">
-
-        <!-- 模擬 BGS 卡盒頂部標籤 (Slab Label) -->
-        <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
-          <div class="flex items-center justify-between mb-3.5">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              BGS 卡盒標籤預覽
+          <h1 class="text-[15px] sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
+            BGS 評分模擬器
+            <span class="hidden md:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              Beckett Grading Simulator
             </span>
             <span id="subTierPill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
               True Gem
@@ -372,7 +316,7 @@
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-2">
 
       <!-- 左側：BGS vs PSA 評分與置中度量化標準對照表 (佔 7 欄) -->
-      <div class="lg:col-span-7 bg-slate-900/75 border border-slate-800 rounded-2xl p-6 shadow-xl">
+      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
         <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -383,46 +327,46 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto rounded-xl border border-slate-800">
-          <table class="w-full text-left border-collapse text-xs">
+        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950">
+          <table class="w-full text-left border-collapse text-xs bg-slate-950 text-slate-300">
             <thead>
-              <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
-                <th class="py-3 px-3 font-bold">BGS 細項分數</th>
-                <th class="py-3 px-3 font-bold">BGS 正面置中要求</th>
-                <th class="py-3 px-3 font-bold">BGS 背面要求</th>
-                <th class="py-3 px-3 font-bold text-rose-400">PSA 對應等級與置中標準</th>
+              <tr class="bg-slate-900 text-slate-200 border-b border-slate-800">
+                <th class="py-3 px-3 font-bold bg-slate-900">BGS 細項分數</th>
+                <th class="py-3 px-3 font-bold bg-slate-900">BGS 正面置中要求</th>
+                <th class="py-3 px-3 font-bold bg-slate-900">BGS 背面要求</th>
+                <th class="py-3 px-3 font-bold text-rose-400 bg-slate-900">PSA 對應等級與置中標準</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/70 text-slate-300">
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 px-3 font-black text-amber-400 whitespace-nowrap">10 (Pristine)</td>
-                <td class="py-3 px-3 font-semibold text-white">四邊皆須 50/50</td>
-                <td class="py-3 px-3">55/45 或更好</td>
-                <td class="py-3 px-3 text-rose-300 font-semibold">PSA 10（遠超標準，價值遠高於 PSA 10）</td>
+            <tbody class="divide-y divide-slate-800/80 bg-slate-950 text-slate-300">
+              <tr class="bg-slate-950 hover:bg-slate-900/80 transition">
+                <td class="py-3 px-3 font-black text-amber-400 whitespace-nowrap bg-slate-950">10 (Pristine)</td>
+                <td class="py-3 px-3 font-semibold text-white bg-slate-950">四邊皆須 50/50</td>
+                <td class="py-3 px-3 bg-slate-950">55/45 或更好</td>
+                <td class="py-3 px-3 text-rose-300 font-semibold bg-slate-950">PSA 10（遠超標準，價值遠高於 PSA 10）</td>
               </tr>
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 px-3 font-black text-amber-300 whitespace-nowrap">9.5 (Gem Mint)</td>
-                <td class="py-3 px-3 font-semibold text-white">一軸 50/50，另一軸 55/45</td>
-                <td class="py-3 px-3">60/40 或更好</td>
-                <td class="py-3 px-3 text-rose-300 font-semibold">PSA 10（PSA 10 允許正面 55/45～60/40）</td>
+              <tr class="bg-slate-950 hover:bg-slate-900/80 transition">
+                <td class="py-3 px-3 font-black text-amber-300 whitespace-nowrap bg-slate-950">9.5 (Gem Mint)</td>
+                <td class="py-3 px-3 font-semibold text-white bg-slate-950">一軸 50/50，另一軸 55/45</td>
+                <td class="py-3 px-3 bg-slate-950">60/40 或更好</td>
+                <td class="py-3 px-3 text-rose-300 font-semibold bg-slate-950">PSA 10（PSA 10 允許正面 55/45～60/40）</td>
               </tr>
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 px-3 font-bold text-slate-200 whitespace-nowrap">9 (Mint)</td>
-                <td class="py-3 px-3">雙軸皆 55/45 或更好</td>
-                <td class="py-3 px-3">70/30 或更好</td>
-                <td class="py-3 px-3 text-amber-200">若僅置中為 9 仍可拚 PSA 10；邊角/表面瑕疵則為 PSA 9</td>
+              <tr class="bg-slate-950 hover:bg-slate-900/80 transition">
+                <td class="py-3 px-3 font-bold text-slate-200 whitespace-nowrap bg-slate-950">9 (Mint)</td>
+                <td class="py-3 px-3 bg-slate-950">雙軸皆 55/45 或更好</td>
+                <td class="py-3 px-3 bg-slate-950">70/30 或更好</td>
+                <td class="py-3 px-3 text-amber-200 bg-slate-950">若僅置中為 9 仍可拚 PSA 10；邊角/表面瑕疵則為 PSA 9</td>
               </tr>
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 px-3 font-bold text-slate-300 whitespace-nowrap">8.5 (NM-MT+)</td>
-                <td class="py-3 px-3">介於 55/45 至 60/40</td>
-                <td class="py-3 px-3">70/30 至 80/20</td>
-                <td class="py-3 px-3 text-slate-300">PSA 8 至 PSA 9（PSA 無 8.5 常見溢價，多歸入 8 或 9）</td>
+              <tr class="bg-slate-950 hover:bg-slate-900/80 transition">
+                <td class="py-3 px-3 font-bold text-slate-300 whitespace-nowrap bg-slate-950">8.5 (NM-MT+)</td>
+                <td class="py-3 px-3 bg-slate-950">介於 55/45 至 60/40</td>
+                <td class="py-3 px-3 bg-slate-950">70/30 至 80/20</td>
+                <td class="py-3 px-3 text-slate-300 bg-slate-950">PSA 8 至 PSA 9（PSA 無 8.5 常見溢價，多歸入 8 或 9）</td>
               </tr>
-              <tr class="hover:bg-slate-800/40 transition">
-                <td class="py-3 px-3 font-bold text-slate-400 whitespace-nowrap">8 (NM-MT)</td>
-                <td class="py-3 px-3">雙軸皆 60/40 或更好</td>
-                <td class="py-3 px-3">80/20 或更好</td>
-                <td class="py-3 px-3 text-slate-400">PSA 8 (NM-MT 8)</td>
+              <tr class="bg-slate-950 hover:bg-slate-900/80 transition">
+                <td class="py-3 px-3 font-bold text-slate-400 whitespace-nowrap bg-slate-950">8 (NM-MT)</td>
+                <td class="py-3 px-3 bg-slate-950">雙軸皆 60/40 或更好</td>
+                <td class="py-3 px-3 bg-slate-950">80/20 或更好</td>
+                <td class="py-3 px-3 text-slate-400 bg-slate-950">PSA 8 (NM-MT 8)</td>
               </tr>
             </tbody>
           </table>
