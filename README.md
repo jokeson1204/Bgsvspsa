@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>BGS (Beckett Grading Services) 評分與總分模擬試算器</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15,6 +16,23 @@
       background-image: 
         radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
         radial-gradient(circle at 85% 80%, rgba(148, 163, 184, 0.07) 0%, transparent 45%);
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 針對 iPhone 16 動態島與底部 Home 指示條的 Safe Area 適配 */
+    .safe-top {
+      padding-top: max(0.625rem, env(safe-area-inset-top));
+    }
+
+    /* 隱藏手機橫向滑動列捲軸但保留滑動功能 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
     /* 金屬標籤漸層與光澤效果 */
@@ -75,108 +93,109 @@
     }
   </style>
 </head>
-<body class="min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200">
+<body class="m-0 p-0 antialiased selection:bg-amber-500/30 selection:text-amber-200">
 
-  <!-- 頂部導覽列 -->
-  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
+  <!-- 頂部導覽列：適配 iPhone 16 動態島安全距離，精簡垂直高度 -->
+  <header class="w-full border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md sticky top-0 z-30 safe-top">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center text-slate-950 font-black text-base sm:text-lg shadow-lg shadow-amber-500/20">
           B
         </div>
-        <div>
-          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            BGS 評分與總分模擬試算器
+        <div class="min-w-0">
+          <h1 class="text-[15px] sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
+            BGS 評分模擬試算器
             <span class="hidden md:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
               Beckett Grading Simulator
             </span>
-            <span class="hidden sm:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
-              + PSA 顯示對照
+            <span class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
+              + PSA 對照
             </span>
           </h1>
-          <p class="text-xs text-slate-400">支援四項細分（Subgrades）演算、木桶效應判定、卡盒標籤預覽與 PSA 跨評等級對照</p>
+          <p class="hidden sm:block text-xs text-slate-400 leading-snug mt-0.5">支援四項細分演算、木桶效應判定、卡盒標籤預覽與 PSA 跨評等級對照</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 text-xs text-slate-400">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+      <div class="shrink-0 flex items-center text-[11px] sm:text-xs text-slate-400">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          BGS / PSA 雙系統即時演算
+          <span class="hidden sm:inline">BGS / PSA 雙系統即時演算</span>
+          <span class="sm:hidden font-medium">雙系統演算</span>
         </span>
       </div>
     </div>
   </header>
 
   <!-- 主要操作與展示區 -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+  <main class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-3.5 pb-10 sm:py-6 space-y-5 sm:space-y-8">
 
     <!-- 核心互動區：左輸入 / 右預覽 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
 
       <!-- 左側：分數控制面板 (佔 7 欄) -->
-      <section class="lg:col-span-7 bg-slate-900/75 border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-2xl backdrop-blur-sm space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+      <section class="lg:col-span-7 bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm space-y-4 sm:space-y-5">
+        <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h2 class="text-[15px] sm:text-lg font-bold text-white flex items-center gap-1.5 sm:gap-2">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
-              四項細分分數設定（Subgrades）
+              四項細分分數設定
             </h2>
-            <p class="text-xs text-slate-400 mt-1">點選按鈕調整各項卡況分數（支援 7 至 10 分）</p>
+            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">點擊按鈕設定各項分數（7 至 10 分）</p>
           </div>
-          <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="self-start sm:self-auto text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-            重設為全 9.5
+          <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-slate-800 active:scale-95 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            重設全 9.5
           </button>
         </div>
 
-        <!-- 常見組合一鍵代入快捷列 -->
-        <div class="space-y-2.5">
+        <!-- 常見組合一鍵代入快捷列：iPhone 橫向滑動不折行，節省垂直空間 -->
+        <div class="space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">常見組合一鍵代入</span>
-            <span class="text-[11px] text-slate-500">點擊快速測試邊界條件</span>
+            <span class="text-[11px] text-slate-500">左右滑動快速切換 →</span>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="applyPreset(10, 10, 10, 10)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-950 text-amber-400 border border-amber-500/60 hover:bg-amber-500/10 transition shadow-sm">
-              黑標 10 (10/10/10/10)
+          <div class="flex sm:flex-wrap gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+            <button type="button" onclick="applyPreset(10, 10, 10, 10)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-zinc-950 text-amber-400 border border-amber-500/60 active:scale-95 hover:bg-amber-500/10 transition shadow-sm">
+              黑標 10 (全10)
             </button>
-            <button type="button" onclick="applyPreset(10, 10, 10, 9.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/50 hover:bg-amber-500/25 transition">
-              金標 10 (10/10/10/9.5)
+            <button type="button" onclick="applyPreset(10, 10, 10, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/50 active:scale-95 hover:bg-amber-500/25 transition">
+              金標 10 (三10一9.5)
             </button>
-            <button type="button" onclick="applyPreset(10, 10, 9.5, 9.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 hover:bg-amber-500/20 transition">
-              強 9.5 Quad+ (10/10/9.5/9.5)
+            <button type="button" onclick="applyPreset(10, 10, 9.5, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 active:scale-95 hover:bg-amber-500/20 transition">
+              強 9.5 Quad+
             </button>
-            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 hover:bg-amber-500/20 transition">
-              標準 9.5 True Gem (全 9.5)
+            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 active:scale-95 hover:bg-amber-500/20 transition">
+              標準 True Gem (全9.5)
             </button>
-            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 hover:bg-amber-500/20 transition">
-              弱 9.5 Min Gem (9.5/9.5/9.5/9)
+            <button type="button" onclick="applyPreset(9.5, 9.5, 9.5, 9)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/30 active:scale-95 hover:bg-amber-500/20 transition">
+              弱 9.5 Min Gem (三9.5一9)
             </button>
-            <button type="button" onclick="applyPreset(10, 10, 9, 9)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 hover:bg-slate-700 transition">
+            <button type="button" onclick="applyPreset(10, 10, 9, 9)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 active:scale-95 hover:bg-slate-700 transition">
               雙 9 降級 (10/10/9/9)
             </button>
-            <button type="button" onclick="applyPreset(10, 10, 10, 8.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 hover:bg-slate-700 transition">
-              單項 8.5 壓制 (10/10/10/8.5)
+            <button type="button" onclick="applyPreset(10, 10, 10, 8.5)" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 active:scale-95 hover:bg-slate-700 transition">
+              單項 8.5 壓制
             </button>
           </div>
         </div>
 
         <!-- 四大細項輸入容器 -->
-        <div id="subgradesContainer" class="space-y-4 pt-1">
+        <div id="subgradesContainer" class="space-y-3 sm:space-y-4 pt-1">
           <!-- 由 JS 動態渲染四個維度的控制列 -->
         </div>
       </section>
 
       <!-- 右側：即時卡盒標籤預覽 & 評分邏輯解析 (佔 5 欄) -->
-      <section class="lg:col-span-5 space-y-6">
+      <section class="lg:col-span-5 space-y-5 sm:space-y-6">
 
         <!-- 模擬 BGS 卡盒頂部標籤 (Slab Label) -->
-        <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-          <div class="flex items-center justify-between mb-4">
+        <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl">
+          <div class="flex items-center justify-between mb-3.5">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
-              BGS 鑑定卡盒標籤即時預覽
+              BGS 卡盒標籤預覽
             </span>
             <span id="subTierPill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
               True Gem
@@ -184,56 +203,56 @@
           </div>
 
           <!-- 模擬塑膠鑑定殼外框 -->
-          <div class="p-3 rounded-xl bg-slate-950/90 border border-slate-700/80 shadow-inner">
+          <div class="p-2.5 sm:p-3 rounded-xl bg-slate-950/90 border border-slate-700/80 shadow-inner">
             <!-- 金屬標籤本體 -->
-            <div id="slabLabelCard" class="slab-gold relative overflow-hidden rounded-lg p-4 transition-all duration-300">
+            <div id="slabLabelCard" class="slab-gold relative overflow-hidden rounded-lg p-3.5 sm:p-4 transition-all duration-300">
               <div class="brushed-overlay absolute inset-0 pointer-events-none"></div>
 
               <!-- 標籤頂部資訊列 -->
-              <div class="relative flex items-center justify-between border-b border-current/20 pb-2 mb-3">
+              <div class="relative flex items-center justify-between border-b border-current/20 pb-2 mb-2.5">
                 <div class="flex items-center gap-2">
-                  <span class="font-black tracking-tighter text-base px-1.5 py-0.5 rounded bg-black/15">BGS</span>
+                  <span class="font-black tracking-tighter text-sm sm:text-base px-1.5 py-0.5 rounded bg-black/15">BGS</span>
                   <div class="leading-tight">
-                    <div class="text-[10px] font-extrabold tracking-widest uppercase opacity-90">BECKETT GRADING SERVICES</div>
-                    <div class="text-[11px] font-bold opacity-80">AUTHENTIC COLLECTIBLE CARD</div>
+                    <div class="text-[9px] sm:text-[10px] font-extrabold tracking-widest uppercase opacity-90">BECKETT GRADING SERVICES</div>
+                    <div class="text-[10px] sm:text-[11px] font-bold opacity-80">AUTHENTIC COLLECTIBLE CARD</div>
                   </div>
                 </div>
-                <div class="text-right text-[10px] font-mono font-bold opacity-75">
+                <div class="text-right text-[9px] sm:text-[10px] font-mono font-bold opacity-75">
                   #0016889527
                 </div>
               </div>
 
-              <!-- 標籤主體：左側四項細分 + 右側總分框 -->
-              <div class="relative grid grid-cols-12 gap-3 items-center">
+              <!-- 標籤主體：左側四項細分 + 右側總分框（針對 iPhone 16 393px 寬度優化間距避免擠壓） -->
+              <div class="relative grid grid-cols-12 gap-2 sm:gap-3 items-center">
                 <!-- 左側：四項細分兩欄排列 -->
-                <div class="col-span-7 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs font-extrabold tracking-tight bg-black/10 rounded-md p-2.5">
-                  <div class="flex items-center justify-between">
-                    <span class="opacity-85">CENTERING</span>
-                    <span id="labelC" class="font-mono text-sm">9.5</span>
+                <div class="col-span-8 sm:col-span-7 grid grid-cols-2 gap-x-2 sm:gap-x-3 gap-y-1.5 text-[11px] sm:text-xs font-extrabold tracking-tight bg-black/10 rounded-md p-2 sm:p-2.5">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="opacity-85 truncate">CENTERING</span>
+                    <span id="labelC" class="font-mono text-xs sm:text-sm shrink-0">9.5</span>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <span class="opacity-85">EDGES</span>
-                    <span id="labelE" class="font-mono text-sm">9.5</span>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="opacity-85 truncate">EDGES</span>
+                    <span id="labelE" class="font-mono text-xs sm:text-sm shrink-0">9.5</span>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <span class="opacity-85">CORNERS</span>
-                    <span id="labelCo" class="font-mono text-sm">9.5</span>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="opacity-85 truncate">CORNERS</span>
+                    <span id="labelCo" class="font-mono text-xs sm:text-sm shrink-0">9.5</span>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <span class="opacity-85">SURFACE</span>
-                    <span id="labelS" class="font-mono text-sm">9.5</span>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="opacity-85 truncate">SURFACE</span>
+                    <span id="labelS" class="font-mono text-xs sm:text-sm shrink-0">9.5</span>
                   </div>
                 </div>
 
                 <!-- 右側：總分與等級名稱 -->
-                <div class="col-span-5 flex flex-col items-center justify-center bg-black/15 rounded-md py-2 px-2 text-center border border-current/20">
-                  <span id="labelGradeTitle" class="text-[10px] font-black tracking-widest uppercase leading-none mb-1">
+                <div class="col-span-4 sm:col-span-5 flex flex-col items-center justify-center bg-black/15 rounded-md py-2 px-1.5 sm:px-2 text-center border border-current/20">
+                  <span id="labelGradeTitle" class="text-[9px] sm:text-[10px] font-black tracking-wider uppercase leading-none mb-1">
                     GEM MINT
                   </span>
-                  <span id="labelFinalScore" class="text-4xl font-black leading-none tracking-tighter">
+                  <span id="labelFinalScore" class="text-3xl sm:text-4xl font-black leading-none tracking-tighter">
                     9.5
                   </span>
-                  <span id="labelColorTag" class="mt-1 text-[9px] font-bold uppercase tracking-wider opacity-85">
+                  <span id="labelColorTag" class="mt-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider opacity-85">
                     GOLD LABEL
                   </span>
                 </div>
@@ -487,6 +506,8 @@
 
     // 初始化渲染控制面板
     function initControls() {
+    // 初始化渲染控制面板（專為 iPhone 16 觸控手感優化：7顆按鈕等寬滿版網格，移除下拉選單）
+    function initControls() {
       const container = document.getElementById('subgradesContainer');
       container.innerHTML = DIMENSIONS.map(dim => {
         const buttonsHtml = SCORE_OPTIONS.map(val => {
@@ -497,7 +518,7 @@
               data-dim="${dim.key}"
               data-val="${val}"
               onclick="setScore('${dim.key}', ${val})"
-              class="score-btn px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition border ${
+              class="score-btn w-full py-2.5 sm:py-2 rounded-xl text-xs sm:text-[13px] font-mono font-bold transition active:scale-95 border text-center ${
                 isSelected
                   ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md shadow-amber-500/20'
                   : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-600 hover:bg-slate-800'
@@ -509,19 +530,17 @@
         }).join('');
 
         return `
-          <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-4 transition hover:border-slate-700">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-bold text-white">${dim.labelZh}</span>
-                  <span class="text-xs font-semibold text-amber-400/90">(${dim.labelEn})</span>
-                </div>
-                <p class="text-[11px] text-slate-400 mt-0.5">${dim.hint}</p>
+          <div class="bg-slate-950/70 border border-slate-800/90 rounded-xl p-3.5 sm:p-4 transition hover:border-slate-700 space-y-2.5">
+            <div class="flex items-baseline justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-sm font-bold text-white">${dim.labelZh}</span>
+                <span class="text-xs font-semibold text-amber-400/90">(${dim.labelEn})</span>
               </div>
+              <span class="text-[11px] text-slate-400 truncate">${dim.hint}</span>
+            </div>
 
-              <div class="flex items-center gap-1.5 flex-wrap">
-                ${buttonsHtml}
-              </div>
+            <div class="grid grid-cols-7 gap-1.5">
+              ${buttonsHtml}
             </div>
           </div>
         `;
@@ -554,9 +573,9 @@
         btns.forEach(btn => {
           const btnVal = parseFloat(btn.getAttribute('data-val'));
           if (btnVal === currentVal) {
-            btn.className = 'score-btn px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition border bg-amber-400 text-slate-950 border-amber-300 shadow-md shadow-amber-500/20';
+            btn.className = 'score-btn w-full py-2.5 sm:py-2 rounded-xl text-xs sm:text-[13px] font-mono font-bold transition active:scale-95 border text-center bg-amber-400 text-slate-950 border-amber-300 shadow-md shadow-amber-500/20';
           } else {
-            btn.className = 'score-btn px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition border bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-600 hover:bg-slate-800';
+            btn.className = 'score-btn w-full py-2.5 sm:py-2 rounded-xl text-xs sm:text-[13px] font-mono font-bold transition active:scale-95 border text-center bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-600 hover:bg-slate-800';
           }
         });
       });
