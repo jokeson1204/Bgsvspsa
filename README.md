@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -108,6 +109,29 @@
             <span class="hidden md:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
               Beckett Grading Simulator
             </span>
+            <span class="inline-block text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30">
+              + PSA 對照
+            </span>
+          </h1>
+          <p class="hidden sm:block text-xs text-slate-400 leading-snug mt-0.5">支援四項細分演算、木桶效應判定、卡盒標籤預覽與 PSA 跨評等級對照</p>
+        </div>
+      </div>
+      <div class="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-400">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="hidden sm:inline">BGS / PSA 雙系統即時演算</span>
+          <span class="sm:hidden">即時演算</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要操作與展示區 -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:py-6 space-y-6 sm:space-y-8">
+
+    <!-- 核心互動區：左輸入 / 右預覽 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
+
       <!-- 左側：分數控制面板 (佔 7 欄) -->
       <section class="lg:col-span-7 bg-slate-900/75 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm space-y-4 sm:space-y-5">
         <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
